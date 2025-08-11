@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Portfólio Digital{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('owner.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('owner.tag_list') }}">Tags</a></li>
+                        <li class="breadcrumb-item active">{{ title }}</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-5 fw-bold">{{ title }}</h1>
+                <p class="lead text-muted">
+                    {% if tag %}
+                        Edite as informações da tag
+                    {% else %}
+                        Crie uma nova tag para categorizar seus projetos
+                    {% endif %}
+                </p>
+            </div>
+            
+            <!-- Form -->
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <form method="POST">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Tag Name -->
+                        <div class="mb-4">
+                            {{ form.name.label(class="form-label") }}
+                            {{ form.name(class="form-control form-control-lg", placeholder="Digite o nome da tag...") }}
+                            {% if form.name.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.name.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Tag Color -->
+                        <div class="mb-4">
+                            {{ form.color.label(class="form-label") }}
+                            <div class="d-flex align-items-center gap-3">
+                                {{ form.color(class="form-control", type="color", style="width: 80px; height: 50px;") }}
+                                <div class="flex-grow-1">
+                                    <input type="text" class="form-control" id="colorHex" value="{{ form.color.data or '#007bff' }}" 
+                                           pattern="^#[0-9A-Fa-f]{6}$" placeholder="#007bff">
+                                    <div class="form-text">Escolha uma cor para a tag ou digite um código hex</div>
+                                </div>
+                            </div>
+                            {% if form.color.errors %}
+                                <div class="text-danger mt-1">
+                                    {% for error in form.color.errors %}
+                                        <small>{{ error }}</small>
+                                    {% endfor %}
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Preview -->
+                        <div class="mb-4">
+                            <label class="form-label">Pré-visualização</label>
+                            <div>
+                                <span class="badge fs-6" id="tagPreview" style="background-color: {{ form.color.data or '#007bff' }}; padding: 0.75rem 1rem;">
+                                    <span id="previewText">{{ form.name.data or 'Nome da Tag' }}</span>
+                                </span>
+                            </div>
+                        </div>
+                        
+                        <!-- Color Presets -->
+                        <div class="mb-4">
+                            <label class="form-label">Cores Sugeridas</label>
+                            <div class="d-flex flex-wrap gap-2">
+                                {% set preset_colors = ['#007bff', '#28a745', '#dc3545', '#ffc107', '#17a2b8', '#6f42c1', '#e83e8c', '#fd7e14', '#20c997', '#6c757d'] %}
+                                {% for color in preset_colors %}
+                                    <button type="button" class="btn border color-preset" 
+                                            style="background-color: {{ color }}; width: 40px; height: 40px;"
+                                            data-color="{{ color }}" title="{{ color }}">
+                                    </button>
+                                {% endfor %}
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                {% if tag %}Atualizar Tag{% else %}Criar Tag{% endif %}
+                            </button>
+                            <a href="{{ url_for('owner.tag_list') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const nameInput = document.getElementById('name');
+    const colorInput = document.getElementById('color');
+    const colorHexInput = document.getElementById('colorHex');
+    const tagPreview = document.getElementById('tagPreview');
+    const previewText = document.getElementById('previewText');
+    const colorPresets = document.querySelectorAll('.color-preset');
+    
+    // Update preview when name changes
+    nameInput.addEventListener('input', function() {
+        const name = this.value.trim() || 'Nome da Tag';
+        previewText.textContent = name;
+    });
+    
+    // Update preview and hex input when color picker changes
+    colorInput.addEventListener('input', function() {
+        const color = this.value;
+        tagPreview.style.backgroundColor = color;
+        colorHexInput.value = color;
+    });
+    
+    // Update preview and color picker when hex input changes
+    colorHexInput.addEventListener('input', function() {
+        const color = this.value;
+        if (color.match(/^#[0-9A-Fa-f]{6}$/)) {
+            tagPreview.style.backgroundColor = color;
+            colorInput.value = color;
+        }
+    });
+    
+    // Color preset buttons
+    colorPresets.forEach(function(button) {
+        button.addEventListener('click', function() {
+            const color = this.dataset.color;
+            colorInput.value = color;
+            colorHexInput.value = color;
+            tagPreview.style.backgroundColor = color;
+            
+            // Remove active class from all presets
+            colorPresets.forEach(b => b.classList.remove('active', 'border-dark'));
+            // Add active class to clicked preset
+            this.classList.add('active', 'border-dark');
+        });
+    });
+    
+    // Set initial active preset
+    const currentColor = colorInput.value;
+    colorPresets.forEach(function(button) {
+        if (button.dataset.color === currentColor) {
+            button.classList.add('active', 'border-dark');
+        }
+    });
+    
+    // Validate hex input
+    colorHexInput.addEventListener('blur', function() {
+        if (this.value && !this.value.match(/^#[0-9A-Fa-f]{6}$/)) {
+            this.classList.add('is-invalid');
+        } else {
+            this.classList.remove('is-invalid');
+        }
+    });
+});
+</script>
+{% endblock %}

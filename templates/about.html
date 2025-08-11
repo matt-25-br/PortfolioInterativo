@@ -1,0 +1,116 @@
+{% extends "base.html" %}
+
+{% block title %}Sobre - Portfólio Digital{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            {% if owner %}
+            <!-- Profile Header -->
+            <div class="text-center mb-5">
+                {% if owner.profile_image %}
+                    <img src="{{ url_for('static', filename='uploads/profiles/' + owner.profile_image) }}" 
+                         alt="{{ owner.name }}" class="rounded-circle mb-4" width="200" height="200" style="object-fit: cover;">
+                {% else %}
+                    <div class="bg-primary rounded-circle d-inline-flex align-items-center justify-content-center mb-4" 
+                         style="width: 200px; height: 200px;">
+                        <i class="fas fa-user fa-5x text-white"></i>
+                    </div>
+                {% endif %}
+                
+                <h1 class="display-4 fw-bold mb-2">{{ owner.name }}</h1>
+                <p class="lead text-muted">Desenvolvedor Full Stack</p>
+            </div>
+
+            <!-- About Content -->
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <h2 class="h3 mb-4">
+                        <i class="fas fa-user me-2 text-primary"></i>Sobre Mim
+                    </h2>
+                    
+                    {% if owner.bio %}
+                        <div class="mb-4">
+                            {{ owner.bio|nl2br }}
+                        </div>
+                    {% else %}
+                        <p>Olá! Sou um desenvolvedor apaixonado por tecnologia e inovação. Tenho experiência em desenvolvimento web full stack, 
+                        sempre buscando criar soluções eficientes e escaláveis. Adoro trabalhar com novas tecnologias e enfrentar desafios 
+                        que me permitam crescer profissionalmente.</p>
+                        
+                        <p>Neste portfólio, você encontrará alguns dos meus projetos mais importantes, que demonstram minhas habilidades 
+                        em diferentes tecnologias e áreas do desenvolvimento de software.</p>
+                    {% endif %}
+                    
+                    <!-- Skills -->
+                    <h3 class="h4 mb-3 mt-5">
+                        <i class="fas fa-code me-2 text-primary"></i>Habilidades Técnicas
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <h5 class="text-muted mb-3">Backend</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fab fa-python me-2 text-primary"></i>Python (Flask, Django)
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-database me-2 text-primary"></i>PostgreSQL, MySQL
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fas fa-server me-2 text-primary"></i>APIs RESTful
+                                </li>
+                            </ul>
+                        </div>
+                        <div class="col-md-6">
+                            <h5 class="text-muted mb-3">Frontend</h5>
+                            <ul class="list-unstyled">
+                                <li class="mb-2">
+                                    <i class="fab fa-html5 me-2 text-danger"></i>HTML5 & CSS3
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fab fa-js-square me-2 text-warning"></i>JavaScript
+                                </li>
+                                <li class="mb-2">
+                                    <i class="fab fa-bootstrap me-2 text-primary"></i>Bootstrap
+                                </li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <!-- Contact -->
+                    <h3 class="h4 mb-3 mt-5">
+                        <i class="fas fa-envelope me-2 text-primary"></i>Contato
+                    </h3>
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p class="mb-2">
+                                <i class="fas fa-envelope me-2 text-muted"></i>
+                                <a href="mailto:{{ owner.email }}" class="text-decoration-none">{{ owner.email }}</a>
+                            </p>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="social-links">
+                                <a href="#" class="btn btn-outline-primary btn-sm me-2">
+                                    <i class="fab fa-linkedin me-1"></i>LinkedIn
+                                </a>
+                                <a href="#" class="btn btn-outline-dark btn-sm">
+                                    <i class="fab fa-github me-1"></i>GitHub
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% else %}
+            <!-- No owner found -->
+            <div class="text-center">
+                <i class="fas fa-user-slash fa-4x text-muted mb-3"></i>
+                <h2 class="text-muted">Perfil não encontrado</h2>
+                <p class="text-muted">As informações do proprietário do portfólio não estão disponíveis no momento.</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endblock %}

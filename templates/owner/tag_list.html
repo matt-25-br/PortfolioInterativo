@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Tags - Portfólio Digital{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold mb-2">
+                        <i class="fas fa-tags me-3 text-primary"></i>Tags
+                    </h1>
+                    <p class="lead text-muted">Organize seus projetos com tags personalizadas</p>
+                </div>
+                <a href="{{ url_for('owner.new_tag') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Nova Tag
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Tags List -->
+    {% if tags %}
+        <div class="row g-4">
+            {% for tag in tags %}
+            <div class="col-lg-4 col-md-6">
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <div class="d-flex align-items-center justify-content-between mb-3">
+                            <div class="d-flex align-items-center">
+                                <span class="badge me-3 fs-6" style="background-color: {{ tag.color }}; padding: 0.75rem 1rem;">
+                                    {{ tag.name }}
+                                </span>
+                            </div>
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm" type="button" data-bs-toggle="dropdown">
+                                    <i class="fas fa-ellipsis-v"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    <li>
+                                        <a class="dropdown-item" href="{{ url_for('main.projects', tag=tag.name) }}">
+                                            <i class="fas fa-eye me-2"></i>Ver Projetos
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <button type="button" class="dropdown-item text-danger" 
+                                                onclick="confirmDeleteTag('{{ tag.name }}', {{ tag.id }})">
+                                            <i class="fas fa-trash me-2"></i>Excluir
+                                        </button>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                        
+                        <div class="text-muted">
+                            <i class="fas fa-folder me-2"></i>
+                            <span>{{ tag.projects|length }} projeto{{ 's' if tag.projects|length != 1 else '' }}</span>
+                        </div>
+                        
+                        <div class="mt-3">
+                            <small class="text-muted">Cor: {{ tag.color }}</small>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        
+        <!-- Statistics -->
+        <div class="row mt-5">
+            <div class="col-12">
+                <div class="card bg-light">
+                    <div class="card-body text-center">
+                        <h5 class="card-title">Estatísticas das Tags</h5>
+                        <div class="row">
+                            <div class="col-md-4">
+                                <h3 class="text-primary">{{ tags|length }}</h3>
+                                <p class="text-muted mb-0">Total de Tags</p>
+                            </div>
+                            <div class="col-md-4">
+                                <h3 class="text-success">
+                                    {% set total_projects = tags|map(attribute='projects')|map('length')|sum %}
+                                    {{ total_projects }}
+                                </h3>
+                                <p class="text-muted mb-0">Projetos com Tags</p>
+                            </div>
+                            <div class="col-md-4">
+                                {% set avg_projects = (total_projects / tags|length) if tags|length > 0 else 0 %}
+                                <h3 class="text-info">{{ "%.1f"|format(avg_projects) }}</h3>
+                                <p class="text-muted mb-0">Média por Tag</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+    {% else %}
+        <!-- Empty state -->
+        <div class="text-center py-5">
+            <i class="fas fa-tags fa-5x text-muted mb-4"></i>
+            <h3 class="text-muted mb-3">Nenhuma tag encontrada</h3>
+            <p class="text-muted mb-4">Crie tags para organizar e categorizar seus projetos de forma eficiente.</p>
+            <a href="{{ url_for('owner.new_tag') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Criar Primeira Tag
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteTagModal" tabindex="-1" aria-labelledby="deleteTagModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteTagModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir a tag <strong id="tagName"></strong>?</p>
+                <p class="text-muted small">Esta ação não pode ser desfeita. A tag será removida de todos os projetos associados.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" id="deleteTagForm" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Excluir Tag
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDeleteTag(tagName, tagId) {
+    document.getElementById('tagName').textContent = tagName;
+    document.getElementById('deleteTagForm').action = `/owner/tag/${tagId}/delete`;
+    
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteTagModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %}

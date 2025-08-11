@@ -1,0 +1,208 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Projetos - Portfólio Digital{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-4">
+        <div class="col-12">
+            <div class="d-flex justify-content-between align-items-center">
+                <div>
+                    <h1 class="display-5 fw-bold mb-2">
+                        <i class="fas fa-folder me-3 text-primary"></i>Meus Projetos
+                    </h1>
+                    <p class="lead text-muted">Gerencie todos os seus projetos</p>
+                </div>
+                <a href="{{ url_for('owner.new_project') }}" class="btn btn-primary btn-lg">
+                    <i class="fas fa-plus me-2"></i>Novo Projeto
+                </a>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Projects List -->
+    {% if projects.items %}
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-hover">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Projeto</th>
+                                <th>Status</th>
+                                <th>Destaque</th>
+                                <th>Curtidas</th>
+                                <th>Comentários</th>
+                                <th>Criado em</th>
+                                <th>Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for project in projects.items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if project.image_filename %}
+                                            <img src="{{ url_for('static', filename='uploads/projects/' + project.image_filename) }}" 
+                                                 alt="{{ project.title }}" class="rounded me-3" width="50" height="50" style="object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light rounded d-flex align-items-center justify-content-center me-3" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <strong>{{ project.title }}</strong>
+                                            <div class="text-muted small">{{ project.description[:50] }}...</div>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    {% if project.is_published %}
+                                        <span class="badge bg-success">
+                                            <i class="fas fa-eye me-1"></i>Publicado
+                                        </span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">
+                                            <i class="fas fa-file-alt me-1"></i>Rascunho
+                                        </span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if project.is_featured %}
+                                        <span class="badge bg-warning text-dark">
+                                            <i class="fas fa-star me-1"></i>Sim
+                                        </span>
+                                    {% else %}
+                                        <span class="text-muted">Não</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <span class="text-danger">
+                                        <i class="fas fa-heart me-1"></i>{{ project.like_count }}
+                                    </span>
+                                </td>
+                                <td>
+                                    <span class="text-primary">
+                                        <i class="fas fa-comment me-1"></i>{{ project.comments|length }}
+                                    </span>
+                                </td>
+                                <td>{{ project.created_at.strftime('%d/%m/%Y') }}</td>
+                                <td>
+                                    <div class="btn-group btn-group-sm" role="group">
+                                        <a href="{{ url_for('main.project_detail', id=project.id) }}" 
+                                           class="btn btn-outline-primary" title="Visualizar">
+                                            <i class="fas fa-eye"></i>
+                                        </a>
+                                        <a href="{{ url_for('owner.edit_project', id=project.id) }}" 
+                                           class="btn btn-outline-secondary" title="Editar">
+                                            <i class="fas fa-edit"></i>
+                                        </a>
+                                        <button type="button" class="btn btn-outline-danger" 
+                                                onclick="confirmDelete('{{ project.title }}', {{ project.id }})" title="Excluir">
+                                            <i class="fas fa-trash"></i>
+                                        </button>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Pagination -->
+        {% if projects.pages > 1 %}
+        <nav aria-label="Navegação de projetos" class="mt-4">
+            <ul class="pagination justify-content-center">
+                {% if projects.has_prev %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('owner.project_list', page=projects.prev_num) }}">
+                            <i class="fas fa-chevron-left"></i>
+                        </a>
+                    </li>
+                {% endif %}
+                
+                {% for page_num in projects.iter_pages() %}
+                    {% if page_num %}
+                        {% if page_num != projects.page %}
+                            <li class="page-item">
+                                <a class="page-link" href="{{ url_for('owner.project_list', page=page_num) }}">
+                                    {{ page_num }}
+                                </a>
+                            </li>
+                        {% else %}
+                            <li class="page-item active">
+                                <span class="page-link">{{ page_num }}</span>
+                            </li>
+                        {% endif %}
+                    {% else %}
+                        <li class="page-item disabled">
+                            <span class="page-link">...</span>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+                
+                {% if projects.has_next %}
+                    <li class="page-item">
+                        <a class="page-link" href="{{ url_for('owner.project_list', page=projects.next_num) }}">
+                            <i class="fas fa-chevron-right"></i>
+                        </a>
+                    </li>
+                {% endif %}
+            </ul>
+        </nav>
+        {% endif %}
+        
+    {% else %}
+        <!-- Empty state -->
+        <div class="text-center py-5">
+            <i class="fas fa-folder-open fa-5x text-muted mb-4"></i>
+            <h3 class="text-muted mb-3">Nenhum projeto encontrado</h3>
+            <p class="text-muted mb-4">Você ainda não criou nenhum projeto. Comece agora!</p>
+            <a href="{{ url_for('owner.new_project') }}" class="btn btn-primary btn-lg">
+                <i class="fas fa-plus me-2"></i>Criar Primeiro Projeto
+            </a>
+        </div>
+    {% endif %}
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteModalLabel">
+                    <i class="fas fa-exclamation-triangle text-warning me-2"></i>Confirmar Exclusão
+                </h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o projeto <strong id="projectName"></strong>?</p>
+                <p class="text-muted small">Esta ação não pode ser desfeita. Todos os comentários e curtidas relacionados ao projeto também serão removidos.</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                <form method="POST" id="deleteForm" style="display: inline;">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}"/>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Excluir Projeto
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+function confirmDelete(projectTitle, projectId) {
+    document.getElementById('projectName').textContent = projectTitle;
+    document.getElementById('deleteForm').action = "{{ url_for('owner.delete_project', id='PROJECT_ID') }}".replace('PROJECT_ID', projectId);
+    
+    var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
+    deleteModal.show();
+}
+</script>
+{% endblock %}

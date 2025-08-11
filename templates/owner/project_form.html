@@ -1,0 +1,215 @@
+{% extends "base.html" %}
+
+{% block title %}{{ title }} - Portfólio Digital{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- Header -->
+            <div class="mb-4">
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item"><a href="{{ url_for('owner.dashboard') }}">Dashboard</a></li>
+                        <li class="breadcrumb-item"><a href="{{ url_for('owner.project_list') }}">Projetos</a></li>
+                        <li class="breadcrumb-item active">{{ title }}</li>
+                    </ol>
+                </nav>
+                
+                <h1 class="display-5 fw-bold">{{ title }}</h1>
+                <p class="lead text-muted">
+                    {% if project %}
+                        Edite as informações do projeto
+                    {% else %}
+                        Preencha as informações do novo projeto
+                    {% endif %}
+                </p>
+            </div>
+            
+            <!-- Form -->
+            <div class="card shadow-sm">
+                <div class="card-body p-5">
+                    <form method="POST" enctype="multipart/form-data">
+                        {{ form.hidden_tag() }}
+                        
+                        <!-- Basic Information -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">
+                                <i class="fas fa-info-circle me-2 text-primary"></i>Informações Básicas
+                            </h4>
+                            
+                            <div class="mb-3">
+                                {{ form.title.label(class="form-label") }}
+                                {{ form.title(class="form-control") }}
+                                {% if form.title.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.title.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.description.label(class="form-label") }}
+                                {{ form.description(class="form-control", rows="3", placeholder="Descrição breve do projeto...") }}
+                                {% if form.description.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.description.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                            
+                            <div class="mb-3">
+                                {{ form.content.label(class="form-label") }}
+                                {{ form.content(class="form-control", rows="6", placeholder="Descrição detalhada do projeto, tecnologias utilizadas, desafios enfrentados...") }}
+                                {% if form.content.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.content.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Media -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">
+                                <i class="fas fa-image me-2 text-primary"></i>Mídia
+                            </h4>
+                            
+                            {% if project and project.image_filename %}
+                                <div class="mb-3">
+                                    <label class="form-label">Imagem atual:</label>
+                                    <div class="mb-2">
+                                        <img src="{{ url_for('static', filename='uploads/projects/' + project.image_filename) }}" 
+                                             alt="{{ project.title }}" class="img-thumbnail" style="max-width: 200px;">
+                                    </div>
+                                </div>
+                            {% endif %}
+                            
+                            <div class="mb-3">
+                                {{ form.image.label(class="form-label") }}
+                                {{ form.image(class="form-control") }}
+                                <div class="form-text">Formatos aceitos: JPG, PNG, GIF. Tamanho máximo: 16MB</div>
+                                {% if form.image.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.image.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        
+                        <!-- Links -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">
+                                <i class="fas fa-link me-2 text-primary"></i>Links
+                            </h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    {{ form.demo_url.label(class="form-label") }}
+                                    {{ form.demo_url(class="form-control", placeholder="https://exemplo.com") }}
+                                    {% if form.demo_url.errors %}
+                                        <div class="text-danger mt-1">
+                                            {% for error in form.demo_url.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                                
+                                <div class="col-md-6 mb-3">
+                                    {{ form.github_url.label(class="form-label") }}
+                                    {{ form.github_url(class="form-control", placeholder="https://github.com/usuario/projeto") }}
+                                    {% if form.github_url.errors %}
+                                        <div class="text-danger mt-1">
+                                            {% for error in form.github_url.errors %}
+                                                <small>{{ error }}</small>
+                                            {% endfor %}
+                                        </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Tags -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">
+                                <i class="fas fa-tags me-2 text-primary"></i>Tags
+                            </h4>
+                            
+                            {% if form.tags.choices %}
+                                <div class="row">
+                                    {% for subfield in form.tags %}
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                {{ subfield(class="form-check-input") }}
+                                                {{ subfield.label(class="form-check-label") }}
+                                            </div>
+                                        </div>
+                                    {% endfor %}
+                                </div>
+                                {% if form.tags.errors %}
+                                    <div class="text-danger mt-1">
+                                        {% for error in form.tags.errors %}
+                                            <small>{{ error }}</small>
+                                        {% endfor %}
+                                    </div>
+                                {% endif %}
+                            {% else %}
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle me-2"></i>
+                                    Nenhuma tag disponível. 
+                                    <a href="{{ url_for('owner.new_tag') }}" class="alert-link">Criar primeira tag</a>
+                                </div>
+                            {% endif %}
+                        </div>
+                        
+                        <!-- Publication Options -->
+                        <div class="mb-4">
+                            <h4 class="mb-3">
+                                <i class="fas fa-cog me-2 text-primary"></i>Opções de Publicação
+                            </h4>
+                            
+                            <div class="row">
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.is_published(class="form-check-input") }}
+                                        {{ form.is_published.label(class="form-check-label") }}
+                                        <div class="form-text">Projeto visível publicamente</div>
+                                    </div>
+                                </div>
+                                
+                                <div class="col-md-6">
+                                    <div class="form-check form-switch mb-3">
+                                        {{ form.is_featured(class="form-check-input") }}
+                                        {{ form.is_featured.label(class="form-check-label") }}
+                                        <div class="form-text">Aparece na seção de destaques</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Actions -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save me-2"></i>
+                                {% if project %}Atualizar Projeto{% else %}Criar Projeto{% endif %}
+                            </button>
+                            <a href="{{ url_for('owner.project_list') }}" class="btn btn-secondary btn-lg">
+                                <i class="fas fa-times me-2"></i>Cancelar
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

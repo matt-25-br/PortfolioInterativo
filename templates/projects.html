@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Projetos - Portfólio Digital{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <!-- Header -->
+    <div class="row mb-5">
+        <div class="col-12 text-center">
+            <h1 class="display-4 fw-bold mb-3">Meus Projetos</h1>
+            <p class="lead text-muted">Explore todos os projetos do meu portfólio</p>
+        </div>
+    </div>
+    
+    <!-- Filters and Search -->
+    <div class="row mb-4">
+        <div class="col-lg-8">
+            <form method="GET" class="d-flex">
+                <input class="form-control me-2" type="search" name="search" 
+                       placeholder="Buscar projetos..." value="{{ search }}"
+                       aria-label="Buscar">
+                <button class="btn btn-outline-primary" type="submit">
+                    <i class="fas fa-search"></i>
+                </button>
+            </form>
+        </div>
+        <div class="col-lg-4">
+            <div class="dropdown">
+                <button class="btn btn-outline-secondary dropdown-toggle w-100" type="button" 
+                        data-bs-toggle="dropdown" aria-expanded="false">
+                    <i class="fas fa-filter me-2"></i>
+                    {% if current_tag %}{{ current_tag }}{% else %}Todas as categorias{% endif %}
+                </button>
+                <ul class="dropdown-menu w-100">
+                    <li><a class="dropdown-item" href="{{ url_for('main.projects') }}">
+                        Todas as categorias
+                    </a></li>
+                    <li><hr class="dropdown-divider"></li>
+                    {% for tag in tags %}
+                    <li><a class="dropdown-item" href="{{ url_for('main.projects', tag=tag.name) }}">
+                        <span class="badge rounded-pill me-2" style="background-color: {{ tag.color }};">
+                            {{ tag.name }}
+                        </span>
+                    </a></li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Projects Grid -->
+    {% if projects.items %}
+    <div class="row g-4 mb-5">
+        {% for project in projects.items %}
+        <div class="col-lg-4 col-md-6">
+            <div class="card h-100 shadow-sm project-card">
+                {% if project.image_filename %}
+                    <img src="{{ url_for('static', filename='uploads/projects/' + project.image_filename) }}" 
+                         class="card-img-top" alt="{{ project.title }}" style="height: 250px; object-fit: cover;">
+                {% else %}
+                    <div class="card-img-top bg-light d-flex align-items-center justify-content-center" 
+                         style="height: 250px;">
+                        <i class="fas fa-image fa-4x text-muted"></i>
+                    </div>
+                {% endif %}
+                
+                <div class="card-body d-flex flex-column">
+                    {% if project.is_featured %}
+                        <div class="badge bg-warning text-dark position-absolute" style="top: 10px; right: 10px;">
+                            <i class="fas fa-star me-1"></i>Destaque
+                        </div>
+                    {% endif %}
+                    
+                    <h5 class="card-title">{{ project.title }}</h5>
+                    <p class="card-text text-muted flex-grow-1">{{ project.description }}</p>
+                    
+                    <!-- Tags -->
+                    <div class="mb-3">
+                        {% for tag in project.tags %}
+                            <span class="badge rounded-pill me-1" style="background-color: {{ tag.color }};">
+                                {{ tag.name }}
+                            </span>
+                        {% endfor %}
+                    </div>
+                    
+                    <!-- Stats and Action -->
+                    <div class="d-flex justify-content-between align-items-center">
+                        <div class="text-muted small">
+                            <i class="fas fa-heart text-danger me-1"></i>{{ project.like_count }}
+                            <i class="fas fa-comment ms-3 me-1"></i>{{ project.comments|length }}
+                            <i class="fas fa-calendar ms-3 me-1"></i>{{ project.created_at.strftime('%d/%m/%Y') }}
+                        </div>
+                        <a href="{{ url_for('main.project_detail', id=project.id) }}" 
+                           class="btn btn-primary btn-sm">
+                            Ver Detalhes
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+    
+    <!-- Pagination -->
+    {% if projects.pages > 1 %}
+    <nav aria-label="Navegação de projetos">
+        <ul class="pagination justify-content-center">
+            {% if projects.has_prev %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.projects', page=projects.prev_num, search=search, tag=current_tag) }}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+            {% endif %}
+            
+            {% for page_num in projects.iter_pages() %}
+                {% if page_num %}
+                    {% if page_num != projects.page %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('main.projects', page=page_num, search=search, tag=current_tag) }}">
+                                {{ page_num }}
+                            </a>
+                        </li>
+                    {% else %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ page_num }}</span>
+                        </li>
+                    {% endif %}
+                {% else %}
+                    <li class="page-item disabled">
+                        <span class="page-link">...</span>
+                    </li>
+                {% endif %}
+            {% endfor %}
+            
+            {% if projects.has_next %}
+                <li class="page-item">
+                    <a class="page-link" href="{{ url_for('main.projects', page=projects.next_num, search=search, tag=current_tag) }}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+            {% endif %}
+        </ul>
+    </nav>
+    {% endif %}
+    
+    {% else %}
+    <!-- No projects found -->
+    <div class="text-center py-5">
+        <i class="fas fa-search fa-4x text-muted mb-3"></i>
+        <h3 class="text-muted mb-3">Nenhum projeto encontrado</h3>
+        {% if search or current_tag %}
+            <p class="text-muted mb-4">Tente ajustar os filtros de busca ou remover alguns termos.</p>
+            <a href="{{ url_for('main.projects') }}" class="btn btn-primary">
+                <i class="fas fa-times me-2"></i>Limpar Filtros
+            </a>
+        {% else %}
+            <p class="text-muted">Os projetos aparecerão aqui quando forem publicados.</p>
+        {% endif %}
+    </div>
+    {% endif %}
+</div>
+{% endblock %}
