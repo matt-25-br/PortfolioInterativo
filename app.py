@@ -44,6 +44,22 @@ def create_app():
     
     # CSRF configuration - disable for auth endpoints
     
+    # Custom template filters
+    @app.template_filter('nl2br')
+    def nl2br_filter(text):
+        """Convert newlines to HTML line breaks"""
+        if text is None:
+            return ''
+        return str(text).replace('\n', '<br>\n')
+    
+    @app.template_filter('safe_nl2br')
+    def safe_nl2br_filter(text):
+        """Convert newlines to HTML line breaks and mark as safe"""
+        from markupsafe import Markup
+        if text is None:
+            return ''
+        return Markup(str(text).replace('\n', '<br>\n'))
+    
     # Login manager configuration
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Por favor, faça login para acessar esta página."

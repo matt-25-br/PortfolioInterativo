@@ -69,7 +69,7 @@
                     {% if project.content %}
                         <hr>
                         <div class="project-content">
-                            {{ project.content|nl2br }}
+                            {{ project.content|safe_nl2br|safe }}
                         </div>
                     {% endif %}
                 </div>
