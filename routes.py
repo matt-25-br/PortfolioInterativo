@@ -142,6 +142,7 @@ def toggle_like(id):
 auth_bp = Blueprint('auth', __name__)
 
 @auth_bp.route('/login', methods=['GET', 'POST'])
+@csrf.exempt
 def login():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))
@@ -164,6 +165,7 @@ def login():
     return render_template('auth/login.html', form=form)
 
 @auth_bp.route('/register', methods=['GET', 'POST'])
+@csrf.exempt
 def register():
     if current_user.is_authenticated:
         return redirect(url_for('main.index'))

@@ -42,7 +42,7 @@ def create_app():
     login_manager.init_app(app)
     csrf.init_app(app)
     
-    # CSRF configuration - disable for AJAX endpoints
+    # CSRF configuration - disable for auth endpoints
     
     # Login manager configuration
     login_manager.login_view = "auth.login"
