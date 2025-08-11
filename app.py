@@ -42,6 +42,8 @@ def create_app():
     login_manager.init_app(app)
     csrf.init_app(app)
     
+    # CSRF configuration - disable for AJAX endpoints
+    
     # Login manager configuration
     login_manager.login_view = "auth.login"
     login_manager.login_message = "Por favor, faça login para acessar esta página."
@@ -68,13 +70,12 @@ def create_app():
         
         owner = User.query.filter_by(is_owner=True).first()
         if not owner:
-            owner = User(
-                username="admin",
-                email="admin@portfolio.com",
-                name="Administrador",
-                password_hash=generate_password_hash("admin123"),
-                is_owner=True
-            )
+            owner = User()
+            owner.username = "admin"
+            owner.email = "admin@portfolio.com"
+            owner.name = "Administrador"
+            owner.password_hash = generate_password_hash("admin123")
+            owner.is_owner = True
             db.session.add(owner)
             db.session.commit()
             logging.info("Owner user created: admin/admin123")

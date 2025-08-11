@@ -48,10 +48,9 @@ def save_image(file, folder, max_size=(800, 600)):
 
 def create_notification(user_id, message):
     """Create a new notification for a user"""
-    notification = Notification(
-        user_id=user_id,
-        message=message
-    )
+    notification = Notification()
+    notification.user_id = user_id
+    notification.message = message
     db.session.add(notification)
     return notification
 

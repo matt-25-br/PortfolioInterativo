@@ -4,7 +4,7 @@ from flask_login import login_user, logout_user, login_required, current_user
 from werkzeug.utils import secure_filename
 from PIL import Image
 from sqlalchemy import or_
-from app import db
+from app import db, csrf
 from models import User, Project, Tag, Comment, Like, Notification
 from forms import LoginForm, RegisterForm, ProfileForm, ProjectForm, TagForm, CommentForm
 from utils import save_image, create_notification
@@ -52,7 +52,9 @@ def projects():
     
     # Apply tag filter
     if tag_filter:
-        query = query.join(Project.tags).filter(Tag.name == tag_filter)
+        tag = Tag.query.filter_by(name=tag_filter).first()
+        if tag:
+            query = query.filter(Project.tags.contains(tag))
     
     projects = query.order_by(Project.created_at.desc())\
                    .paginate(page=page, per_page=9, error_out=False)
@@ -87,11 +89,10 @@ def add_comment(id):
     form = CommentForm()
     
     if form.validate_on_submit():
-        comment = Comment(
-            content=form.content.data,
-            user_id=current_user.id,
-            project_id=project.id
-        )
+        comment = Comment()
+        comment.content = form.content.data
+        comment.user_id = current_user.id
+        comment.project_id = project.id
         db.session.add(comment)
         
         # Create notification for owner
@@ -107,6 +108,7 @@ def add_comment(id):
     return redirect(url_for('main.project_detail', id=id))
 
 @main_bp.route('/project/<int:id>/like', methods=['POST'])
+@csrf.exempt
 @login_required
 def toggle_like(id):
     project = Project.query.get_or_404(id)
@@ -116,7 +118,9 @@ def toggle_like(id):
         db.session.delete(like)
         liked = False
     else:
-        like = Like(user_id=current_user.id, project_id=project.id)
+        like = Like()
+        like.user_id = current_user.id
+        like.project_id = project.id
         db.session.add(like)
         liked = True
         
@@ -166,11 +170,10 @@ def register():
     
     form = RegisterForm()
     if form.validate_on_submit():
-        user = User(
-            username=form.username.data,
-            name=form.name.data,
-            email=form.email.data
-        )
+        user = User()
+        user.username = form.username.data
+        user.name = form.name.data
+        user.email = form.email.data
         user.set_password(form.password.data)
         
         db.session.add(user)
@@ -253,16 +256,15 @@ def new_project():
     form = ProjectForm()
     
     if form.validate_on_submit():
-        project = Project(
-            title=form.title.data,
-            description=form.description.data,
-            content=form.content.data,
-            demo_url=form.demo_url.data,
-            github_url=form.github_url.data,
-            is_published=form.is_published.data,
-            is_featured=form.is_featured.data,
-            user_id=current_user.id
-        )
+        project = Project()
+        project.title = form.title.data
+        project.description = form.description.data
+        project.content = form.content.data
+        project.demo_url = form.demo_url.data
+        project.github_url = form.github_url.data
+        project.is_published = form.is_published.data
+        project.is_featured = form.is_featured.data
+        project.user_id = current_user.id
         
         if form.image.data:
             filename = save_image(form.image.data, 'projects')
@@ -339,10 +341,9 @@ def new_tag():
     form = TagForm()
     
     if form.validate_on_submit():
-        tag = Tag(
-            name=form.name.data,
-            color=form.color.data
-        )
+        tag = Tag()
+        tag.name = form.name.data
+        tag.color = form.color.data
         db.session.add(tag)
         db.session.commit()
         
