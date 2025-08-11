@@ -199,7 +199,7 @@
 <script>
 function confirmDelete(projectTitle, projectId) {
     document.getElementById('projectName').textContent = projectTitle;
-    document.getElementById('deleteForm').action = "{{ url_for('owner.delete_project', id='PROJECT_ID') }}".replace('PROJECT_ID', projectId);
+    document.getElementById('deleteForm').action = '/owner/project/' + projectId + '/delete';
     
     var deleteModal = new bootstrap.Modal(document.getElementById('deleteModal'));
     deleteModal.show();
