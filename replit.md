@@ -15,7 +15,13 @@ Preferred communication style: Simple, everyday language.
 - **MVC pattern** implementation with separate models, routes, and templates
 - **SQLAlchemy ORM** for database operations with declarative base model
 - **Flask-Login** for user authentication and session management
-- **Flask-WTF** for form handling and CSRF protection
+- **Flask-WTF** for form handling and CSRF protection (auth endpoints exempt)
+
+### Recent Changes (August 2025)
+- **Database tables created** and admin user configured (admin/admin123)
+- **CSRF token issues resolved** for authentication forms
+- **Template errors fixed** including nl2br filter and JavaScript URL generation
+- **System fully operational** with login, dashboard, and project management working
 
 ### Database Design
 - **PostgreSQL** as the primary database (configurable via DATABASE_URL)
