@@ -1,5 +1,6 @@
 flask
 flask_sqlalchemy
+flask_login
 fastapi==0.115.12
 uvicorn==0.34.3
 flet==0.28.2
